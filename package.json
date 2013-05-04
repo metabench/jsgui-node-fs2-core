@@ -1,0 +1,32 @@
+{
+  "name": "jsgui-node-fs2-core",
+  "version": "0.1.0",
+  "main": "jsgui-node-fs2-core.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/metabench/jsgui-node-fs2-core"
+  },
+  "keywords": [
+    "fs",
+    "file",
+    "directory",
+    "jsgui"
+  ],
+  "dependencies" : {
+    "jsgui-lang-essentials" :  "0.4.x",
+    "jsgui-node-file-checksum" :  "0.3.x",
+    "amdefine": ">=0.0.4"
+  },
+  "author": "James Vickers <james@metabench.com>",
+  "description": "jsgui - Image module. Load, save, access metadata.",
+  "contributors": [ 
+    {
+      "name": "James Vickers",
+      "email": "james@metabench.com"
+    } 
+  ],
+  "license": "MIT"
+}
