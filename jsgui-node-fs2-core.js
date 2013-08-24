@@ -5,7 +5,7 @@ if (typeof define !== 'function') {
 
 //['jsgui-lang-essentials', 'node-rasters']
 
-define(['jsgui-lang-essentials', 'child_process', 'ncp', 'jsgui-node-file-checksum'], 
+define(['../core/jsgui-lang-essentials', 'child_process', 'ncp', './jsgui-node-file-checksum'], 
 function (jsgui, child_process, ncp_module, checksum) {
 //define(['jsgui-lang-essentials', 'node-rasters', 'node-spritesheet', 'xpath', 'jsgui-html', 'phantom', 'xmldom', 'ncp'], function (jsgui, node_rasters, node_spritesheet, xpath, jsgui_html, phantom, xmldom, ncp) {
     
@@ -101,6 +101,30 @@ function (jsgui, child_process, ncp_module, checksum) {
 	}
     
 	var fs2 = {
+
+		'path_parent': function(strPath) {
+			var dirSep = '/';
+			var pos1 = strPath.lastIndexOf(dirSep);
+			if (pos1 > -1) {
+				var beginning = strPath.substr(0, pos1);
+				console.log('beginning ' + beginning);
+				return beginning;
+			}
+
+		},
+
+		'path_last_part': function(strPath) {
+			// the last part is not necessarily a file name, it may be.
+			var dirSep = '/';
+			var pos1 = strPath.lastIndexOf(dirSep);
+			if (pos1 > -1) {
+				var theRest = strPath.substr(pos1 + 1);
+				console.log('theRest ' + theRest);
+				return theRest;
+			}
+
+		},
+
 		// dir_svg_dirs_to_png_dirs
 		//  creates the png directories according to output format.
 		//  could output to multiple formats as well.
@@ -168,7 +192,7 @@ function (jsgui, child_process, ncp_module, checksum) {
 		//  may need to modify mapify to support callback functions like arrayify.
 		//  Can save a whole bunch of files as strings.
 		'save_file_as_string': mapify(fp(function(a, sig) {
-		    
+		    console.log('save_file_as_string sig ' + sig);
 		    if (sig == '[s,s,f]') {
 		        var file_path = a[0];
 		        var file_content = a[1];
@@ -207,7 +231,7 @@ function (jsgui, child_process, ncp_module, checksum) {
 		    
 		    var source_path, concurrency_limit = 4, callback;
 		    
-		    console.log('sig ' + sig);
+		    //console.log('load_file_as_string sig ' + sig);
 		    
 		    if (sig == '[a,n,f]') {
 		        source_path = a[0];
@@ -231,6 +255,9 @@ function (jsgui, child_process, ncp_module, checksum) {
 		    if (tof(source_path) == 'string') {
 		        fs.readFile(source_path, function(err, data_buffer) {
                     if (err) {
+                    	var stack = new Error().stack;
+						console.log(stack);
+
                         throw err;
                     } else {
                         callback(null, data_buffer.toString());   
@@ -261,6 +288,11 @@ function (jsgui, child_process, ncp_module, checksum) {
 		}),
 		
 		'dir_dirs_beginning': function(dir_path, beginning_text, callback) {
+			console.log('dir_path ' + dir_path);
+			console.log('dir_path ' + tof(dir_path));
+
+			// dir_contents has been arrayified, need to make sure it still works.
+			console.log('pre dir_contents');
 			fs2.dir_contents(dir_path, function(err, dir_contents) {
 				if (err) {
 					throw err;
@@ -315,6 +347,41 @@ function (jsgui, child_process, ncp_module, checksum) {
 					}
 				});
 			}
+		},
+
+		// dir_ensure_named_numbered
+
+		'dir_ensure_named_numbered': function(parentPath, name, callback) {
+			// get the list of directories in the parent, make a map.
+			this.dir_dirs_beginning(parentPath, name, function(err, resDirsBeginning) {
+				if (err) {
+					callback(err);
+				} else {
+					console.log('resDirsBeginning ' + stringify(resDirsBeginning));
+					var map_dirs_beginning = {};
+					each(resDirsBeginning, function(i, v) {
+						map_dirs_beginning[v] = true;
+					});
+					console.log('map_dirs_beginning ' + stringify(map_dirs_beginning));
+
+					// then loop to generate the name
+					var c = 0, genName = name + '_' + c;
+					while (map_dirs_beginning[genName]) {
+						c++;
+						genName = name + '_' + c;
+					}
+					// then we create the directory.
+
+					var dirPath = parentPath + '/' + genName;
+					console.log('dirPath ' + dirPath);
+
+					fs2.dir_ensure(dirPath, callback);
+
+
+
+				}
+			})
+
 		},
 		
 		// likely to use an extension filer on dir_contents?
@@ -422,7 +489,7 @@ function (jsgui, child_process, ncp_module, checksum) {
 		    
 		    var res_format = 'array';
 		    
-		    //console.log('dir_contents sig ' + sig);
+		    console.log('dir_contents sig ' + sig);
 		    
 		    // may want to specify options object.
 		    //  may want to load the directories, that could be specified as an option.
@@ -487,8 +554,8 @@ function (jsgui, child_process, ncp_module, checksum) {
 		                fs_paths = options.fs_paths;
 		                //throw 'stop';
 		            }
-		            
 		            callback = a[2];
+		            console.log('sof');
 		        }
 		        
 		        if (sig == '[s,b,f]') {
@@ -540,7 +607,7 @@ function (jsgui, child_process, ncp_module, checksum) {
 		    }
 		    
 		    // ssbff?
-		    
+		    //console.log ('!callback ' + tof(callback));
 			//path = path.replace(/\//g, '\\');
 			//console.log('dir_contents path ' + path);
 			
@@ -548,7 +615,8 @@ function (jsgui, child_process, ncp_module, checksum) {
 			
 			// readdir working on a bunch of paths automatically?
 			//  or have this function arrayified?
-			
+			//console.log('pre fs.readdir');
+			//throw 'stop';
 			fs.readdir(path, function(err, files) {
 				if (err) {
 					//console.log('err ' + err);
@@ -556,7 +624,8 @@ function (jsgui, child_process, ncp_module, checksum) {
 					console.log(stack);
 					throw('err ' + err);
 				} else {
-					//console.log('files ' + stringify(files));
+
+					console.log('files ' + stringify(files));
 					//console.log('typeof files ' + stringify(typeof files));
 					//console.log('dir_contents path ' + path);
 					var res = {};
@@ -564,8 +633,9 @@ function (jsgui, child_process, ncp_module, checksum) {
 					var res_directories = [];
 					var c = files.length;
 					//console.log('c ' + c);
-					
+					//console.log ('!2callback ' + tof(callback));
 					var cb = function() {
+						console.log('cb ');
 					    if (files_or_directories == 'files') {
 					        callback(null, res_files);
 					    } else if (files_or_directories == 'directories') {
@@ -580,6 +650,8 @@ function (jsgui, child_process, ncp_module, checksum) {
                             }
                             //return res;
                             //console.log('res ' + stringify(res));
+                            //console.log('tof callback ' + tof(callback));
+                            //console.log('callback ' + stringify(callback));
                             callback(null, res);
 					    }
 					    
@@ -709,15 +781,15 @@ function (jsgui, child_process, ncp_module, checksum) {
                                             fns.push([fs2.load_file_as_string, [file_or_dir_full_path]]);
                                         }
                                         
-                                        console.log('fns.length ' + fns.length);
+                                        //console.log('fns.length ' + fns.length);
                                         
                                         fns.go(function(err, fns_res) {
                                             if (err) {
                                                 throw err;
                                             } else {
                                                 
-                                                console.log('fns_res ' + stringify(fns_res));
-                                                console.log('tof(fns_res) ' + tof(fns_res));
+                                                //console.log('fns_res ' + stringify(fns_res));
+                                                //console.log('tof(fns_res) ' + tof(fns_res));
                                                 
                                                 // we may need to return the fs paths with the data...
                                                 // path, content, metadata
@@ -743,7 +815,7 @@ function (jsgui, child_process, ncp_module, checksum) {
                                                     }
                                                     
                                                 } else if (include_metadata) {
-                                                    var metadata = fn_res[0];
+                                                    var metadata = fns_res[0];
                                                     if (res_format == 'array') {
                                                         var item_res = [file_or_dir_full_path, metadata];
                                                         res_files.push(item_res);
@@ -968,6 +1040,8 @@ function (jsgui, child_process, ncp_module, checksum) {
 		
 		// copy a file as well.
 		
+		// This could be arrayified? But it would need parameter pairs?
+
 		'copy_file': function(source_path, dest_path, callback) {
 			console.log('source_path ' + source_path);
 			console.log('dest_path ' + dest_path);
