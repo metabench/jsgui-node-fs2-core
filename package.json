@@ -1,6 +1,6 @@
 {
     "name": "jsgui-node-fs2-core",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "main": "jsgui-node-fs2-core.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
