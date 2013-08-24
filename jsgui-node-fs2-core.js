@@ -5,7 +5,7 @@ if (typeof define !== 'function') {
 
 //['jsgui-lang-essentials', 'node-rasters']
 
-define(['../core/jsgui-lang-essentials', 'child_process', 'ncp', './jsgui-node-file-checksum'], 
+define(['jsgui-lang-essentials', 'child_process', 'ncp', 'jsgui-node-file-checksum'], 
 function (jsgui, child_process, ncp_module, checksum) {
 //define(['jsgui-lang-essentials', 'node-rasters', 'node-spritesheet', 'xpath', 'jsgui-html', 'phantom', 'xmldom', 'ncp'], function (jsgui, node_rasters, node_spritesheet, xpath, jsgui_html, phantom, xmldom, ncp) {
     
@@ -121,6 +121,8 @@ function (jsgui, child_process, ncp_module, checksum) {
 				var theRest = strPath.substr(pos1 + 1);
 				console.log('theRest ' + theRest);
 				return theRest;
+			} else {
+				return strPath;
 			}
 
 		},
